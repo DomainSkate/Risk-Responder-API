@@ -1,6 +1,6 @@
-# Risk Responder API
+# Evaluation API
 
-This document will describe the specifications of the Risk Responder API
+This document will describe the specifications of the Evaluation API
 
 ### Authentication
 
@@ -21,7 +21,7 @@ https://app.domainskate.com/api/v1/digital-identity
 
 # APIs
 
-Risk Responder analyzes data points about each brand and tries to come up with a report that's easy to read and understand by business people. The process is slow due to the sheer size of it.
+Evaluation analyzes data points about each brand and tries to come up with a report that's easy to read and understand by business people. The process is slow due to the sheer size of it.
 
 ## Create API
 

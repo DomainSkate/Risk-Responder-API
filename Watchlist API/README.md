@@ -1,11 +1,11 @@
 # Watchlist API
 
-This document will describe the specifications of the Watchlist API
+This document will describe the specifications of the Watchlist API.
 
 ### Authentication
 
 - All APIs require Token Authentication.
-- Please contact us to request/renew your token (via ayman@domainskate.com).
+- Please contact us to request/renew your token (via systems@domainskate.com).
 - Token should be passed in every API request via headers (see required headers).
 
 ### Required headers
@@ -28,7 +28,7 @@ https://app.domainskate.com/api/v1/watchlist/webhooks/
 # APIs
 
 Watchlist allows users to add domains into a monitored list, any changes detected by our system for these domains will be immediately reported to the user.
-Changes include: Website information, website screenshot, website threat evaluation and website whois information.
+Changes include: Website information, website screenshot, website threat evaluation and website whois information including raw whois data.
 
 # Watchlist APIs
 
@@ -48,21 +48,21 @@ curl -X POST \
   -H 'Authorization: Token <your-token>' \
   -H 'Content-Type: application/json' \
   -d '{
-	"domains": ["https://www.domainskate.com", "https://www.domainskate.nyc"],
+	"domains": ["https://www.domainskate.com", "https://www.domainskate.nyc"]
 }'
 ```
 
 **Example response**
 
-```bash
+```json
 {
     "success": [{
       "uuid": "Domain UUID",
       "url": "Domain URL"
     }],
-    "invalid_urls": list of possible invalid formatted urls.
-    "duplicate_urls": list of already existing domains in your watchlist.
-    "maximum_domains_error": list of domains unaccepted due to maximum limit.
+    "invalid_urls": "list of possible invalid formatted urls.",
+    "duplicate_urls": "list of already existing domains in your watchlist.",
+    "maximum_domains_error": "list of domains unaccepted due to maximum limit."
 }
 ```
 
@@ -85,12 +85,10 @@ curl -X GET \
 {
   "watchlist": [
     {
-      "count": 1,
       "uuid": "UUID",
       "url": "domainskate.com"
     },
     {
-      "count": 2,
       "uuid": "UUID",
       "url": "domainskate.net"
     }
@@ -108,7 +106,7 @@ curl -X GET \
 curl -X GET \
   https://app.domainskate.com/api/v1/watchlist/details/ \
   -H 'Authorization: Token <your-token>' \
-  -H 'Content-Type: application/json'
+  -H 'Content-Type: application/json' \
   -d '{
 	"uuid": DomainUUID,
   }'
@@ -159,8 +157,8 @@ This also accepts an optional "date" with the following format: YYYY-MM-DD
     "domain_expires": "2027-09-21",
     "registrar": "NOM-IQ Ltd dba Com Laude",
     "name_servers": "ns-1086.awsdns-07.org, ns-1630.awsdns-11.co.uk, ns-47.awsdns-05.com, ns-576.awsdns-08.net",
-    "status": 1,
     "whois_changed": true,
+    "domain_status": "Domain Status",
     "registrant_company": "Turner Broadcasting System, Inc.",
     "registrant_state": "GA",
     "registrant_country": "United States",
@@ -168,7 +166,8 @@ This also accepts an optional "date" with the following format: YYYY-MM-DD
     "admin_company": "REDACTED FOR PRIVACY",
     "admin_state": "REDACTED FOR PRIVACY",
     "admin_country": "REDACTED FOR PRIVACY",
-    "admin_email": "cnn.com-Admin@anonymised.email"
+    "admin_email": "cnn.com-Admin@anonymised.email",
+    "raw_whois": "Raw Whois Data"
   }
 }
 ```
@@ -209,7 +208,7 @@ curl -X DELETE \
 
 # Webhook APIs
 
-Webhooks will be contacted daily **when** changes are detected in our scope of detection.
+Webhooks will be contacted when changes are detected in our scope of detection. For additional details, see [Detected Changes Explanation](https://github.com/DomainSkate/Risk-Responder-API/tree/main/Watchlist%20API#detected-changes-explanation).
 
 ## Create API
 
@@ -225,7 +224,7 @@ curl -X POST \
   -H 'Authorization: Token <your-token>' \
   -H 'Content-Type: application/json' \
   -d '{
-	"url": "Valid URL",
+	"url": "Valid URL"
   }'
 ```
 
@@ -236,31 +235,45 @@ curl -X POST \
   "uuid": "uuid",
   "created_date": "date",
   "url": "domain url",
-  "ip_address": "domain ip address",
-  "mx_records": "domain mx records",
-  "dns_records": "domain dns records",
-  "detected_change": "" 
+  "detected_change": ""
 }
 ```
 
-### Detected Change explanation
-Detected change will vary depending on where exactly the change occurred; our system detects and monitors different sections for each result, for example, if what changed is the threat evaluation, the output will be like so:
+### Detected Changes Explanation
+Detected change will vary depending on where exactly the change occurred; our system detects and monitors different sections for each result here are the possible changes:
+
+**Threat Evaluation Change**
 
 ```json
 {
   "uuid": "uuid",
   "created_date": "date",
   "url": "domain url",
-  "ip_address": "domain ip address",
-  "mx_records": "domain mx records",
-  "dns_records": "domain dns records",
-  "detected_change": "Evaluation",
-  "evaluation": {
-    "evaluation_date": "date",
-    "website_type": "domain type",
-    "threats": "domain threats",
-    "evaluation_changed": "if threat changed from previous day" // True/False
-  }
+  "detected_change": "Evaluation"
+}
+```
+
+**Screenshot/Website Information Change**
+```json
+{
+  "uuid": "uuid",
+  "created_date": "date",
+  "url": "domain url",
+  "detected_change": "Screenshot",
+  "list_of_changes": "This will contain which fields changed, all possible changes listed below"
+}
+```
+**Possible changes in fields for Screenshot**
+
+Page Title, Redirects, Special Tags (parked, for-sale, blank), Metadata Keywords, Metadata Description, OG Image, Social Media Links, Screenshot Image.
+
+**Whois Change**
+```json
+{
+  "uuid": "uuid",
+  "created_date": "date",
+  "url": "domain url",
+  "detected_change": "Whois"
 }
 ```
 
